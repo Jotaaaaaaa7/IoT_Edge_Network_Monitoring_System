@@ -1,0 +1,24 @@
+services:
+  streamlit_ui:
+    build:
+      context: ./streamlit_ui
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./streamlit_ui:/app
+      - ./streamlit_ui/config:/shared-data
+      - ./monitor_engine/logs:/var/log
+    networks:
+      - iot_network
+
+  monitor_engine:
+    build:
+      context: ./monitor_engine
+    volumes:
+      - ./monitor_engine/logs:/var/log
+      - ./streamlit_ui/config:/shared-data
+    networks:
+      - iot_network
+
+networks:
+  iot_network:
