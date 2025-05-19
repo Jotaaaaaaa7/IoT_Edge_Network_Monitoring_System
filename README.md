@@ -19,9 +19,7 @@ Este sistema permite al usuario:
 
 📷 A continuación se muestra una captura del panel principal desarrollado en Streamlit, donde se pueden registrar dispositivos, ver su estado y lanzar tareas de monitorización manual o automática:
 
-> 👉 **[Aquí debes incluir una imagen del dashboard de Streamlit en ejecución]**  
-> Ejemplo:
-> ![Captura del sistema en funcionamiento](docs/screenshot_ui.png)
+> ![Captura del sistema en funcionamiento](./screenshot.jpg)
 
 ---
 
