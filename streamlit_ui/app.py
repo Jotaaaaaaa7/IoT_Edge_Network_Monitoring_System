@@ -7,71 +7,63 @@ from modules import network_tools
 
 # Configuración de la página
 st.set_page_config(page_title="IoT Edge Monitor", layout="wide")
-st.title("📡 IoT Edge Device Monitor")
-st.markdown("Sistema de monitorización de dispositivos IoT desde un Edge Gateway")
+st.markdown("<h1 style='text-align: center;'>📡 IoT Edge Device Monitor 📡</h1>", unsafe_allow_html=True)
 
 # Inicializar estados de sesión si no existen
 if 'editing_device' not in st.session_state:
     st.session_state.editing_device = None
 
-# Crear dos columnas principales
-col1, col2, col3 = st.columns([9, 0.1, 9])
 
-# ─────────────────────────────────────
-# 📍 Columna izquierda: Configuración
-# ─────────────────────────────────────
-with col1:
-    st.subheader("⚙️ Configuración")
-    st.markdown("Gestiona los dispositivos IoT que deseas monitorizar.")
+st.markdown("Gestiona los dispositivos IoT que deseas monitorizar.")
 
-    # Formulario para añadir o editar dispositivos
-    if st.session_state.editing_device is None:
-        with st.form("add_device_form"):
-            st.markdown("### Añadir nuevo dispositivo")
-            ip_or_hostname = st.text_input("Dirección IP o hostname del dispositivo", "")
+# Formulario para añadir o editar dispositivos
+if st.session_state.editing_device is None:
+    with st.form("add_device_form"):
+        st.markdown("### Añadir nuevo dispositivo")
+        ip_or_hostname = st.text_input("Dirección IP o hostname del dispositivo", "")
 
-            # Dividir los parámetros en dos columnas dentro del formulario
-            form_col1, form_col2 = st.columns(2)
-            with form_col1:
-                frequency = st.number_input("Frecuencia (min)", min_value=1, value=5)
-            with form_col2:
-                latency_threshold = st.number_input("Umbral latencia (ms)", min_value=1, value=100)
+        # Dividir los parámetros en dos columnas dentro del formulario
+        form_col1, form_col2 = st.columns(2)
+        with form_col1:
+            frequency = st.number_input("Frecuencia (min)", min_value=1, value=5)
+        with form_col2:
+            latency_threshold = st.number_input("Umbral latencia (ms)", min_value=1, value=100)
 
-            col_ping1, col_ping2 = st.columns([1, 3])
-            ping_clicked = col_ping1.form_submit_button("🔍 Probar conectividad")
-            submitted = col_ping2.form_submit_button("➕ Añadir dispositivo")
+        col_ping1, col_ping2 = st.columns([1, 3])
+        ping_clicked = col_ping1.form_submit_button("🔍 Probar conectividad")
+        submitted = col_ping2.form_submit_button("➕ Añadir dispositivo")
 
-            if ping_clicked:
-                if ip_or_hostname:
-                    success, response = network_tools.ping_host(ip_or_hostname)
-                    if success:
-                        st.success("✅ El host respondió correctamente al ping.")
-                        st.text(response)
-                    else:
-                        st.error("❌ El host no respondió.")
-                        st.text(response)
+        if ping_clicked:
+            if ip_or_hostname:
+                success, response = network_tools.ping_host(ip_or_hostname)
+                if success:
+                    st.success("✅ El host respondió correctamente al ping.")
+                    st.text(response)
                 else:
-                    st.warning("⚠️ Introduce primero una IP o hostname.")
+                    st.error("❌ El host no respondió.")
+                    st.text(response)
+            else:
+                st.warning("⚠️ Introduce primero una IP o hostname.")
 
-            if submitted:
-                if not re.match(r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", ip_or_hostname):
-                    st.error("❌ IP o hostname no válido.")
+        if submitted:
+            if not re.match(r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", ip_or_hostname):
+                st.error("❌ IP o hostname no válido.")
+            else:
+                octetos = ip_or_hostname.split('.')
+                is_valid_ip = all(0 <= int(octeto) <= 255 for octeto in octetos)
+                if not is_valid_ip:
+                    st.error("❌ IP inválida: octetos fuera de rango.")
                 else:
-                    octetos = ip_or_hostname.split('.')
-                    is_valid_ip = all(0 <= int(octeto) <= 255 for octeto in octetos)
-                    if not is_valid_ip:
-                        st.error("❌ IP inválida: octetos fuera de rango.")
-                    else:
-                        device = {
-                            "host": ip_or_hostname,
-                            "frequency_min": frequency,
-                            "latency_ms": latency_threshold
-                        }
-                        config_manager.save_device(device)
-                        st.success(f"✅ Dispositivo '{ip_or_hostname}' guardado correctamente.")
-                        time.sleep(1)
-                        st.rerun()
-    else:
+                    device = {
+                        "host": ip_or_hostname,
+                        "frequency_min": frequency,
+                        "latency_ms": latency_threshold
+                    }
+                    config_manager.save_device(device)
+                    st.success(f"✅ Dispositivo '{ip_or_hostname}' guardado correctamente.")
+                    time.sleep(1)
+                    st.rerun()
+else:
         # Formulario para editar dispositivo existente
         with st.form("edit_device_form"):
             st.markdown(f"### Editar dispositivo")
@@ -106,10 +98,20 @@ with col1:
                 time.sleep(1)
                 st.rerun()
 
-    st.subheader("📊 Últimos eventos de monitorización")
+st.markdown(' ')
 
+# Crear dos columnas principales
+col1, col2 = st.columns(2)
+
+# ─────────────────────────────────────
+# 📍 Columna izquierda: Configuración
+# ─────────────────────────────────────
+with col1:
+
+
+    st.subheader("🚧 Últimos eventos")
     # Botón para refrescar manualmente
-    if st.button("🔄 Refrescar datos"):
+    if st.button("🔄 Refrescar datos", use_container_width=True):
         st.rerun()
 
     # Contenedor para los logs
@@ -124,13 +126,9 @@ with col1:
 
 
 with col2:
-    pass
+    st.markdown(' ')
 
-# ─────────────────────────────────────
-# 📍 Columna derecha: Monitorización
-# ─────────────────────────────────────
-with col3:
-    st.subheader("📋 Dispositivos monitoreados")
+    st.subheader("💻 Dispositivos monitoreados")
 
     devices = config_manager.load_devices()
     if devices:

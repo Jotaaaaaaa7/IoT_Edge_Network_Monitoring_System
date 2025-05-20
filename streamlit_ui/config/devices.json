@@ -7,11 +7,16 @@
     {
         "host": "127.0.0.1",
         "frequency_min": 22,
-        "latency_ms": 200
+        "latency_ms": 12
     },
     {
         "host": "8.8.8.8",
         "frequency_min": 5,
-        "latency_ms": 100
+        "latency_ms": 10
+    },
+    {
+        "host": "125.2.2.3",
+        "frequency_min": 1,
+        "latency_ms": 107
     }
 ]
